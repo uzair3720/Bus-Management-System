@@ -1,0 +1,445 @@
+#include <stdio.h>
+void inputCheck1(int *main_choice);
+void inputCheck2(int *admin_choice);
+void inputCheck3(int *remove_bus,int *bus_in_use);
+void inputCheck4(int *route_choice);
+void passCheck(char pass_input[],char pass[]);
+void displayBuses(int busesInUse,char from[][100],char to[][100],char time[][6],char price[][100],int seat[]);
+
+int main(void)
+{
+	int mainChoice;
+	int returnChoice;
+	int returnChoice2;
+	
+	
+	char pass[6]="123456";
+	char passInput[6];
+	
+	int noOfBuses=100;
+	int seatsPerBus=30;
+	int busesInUse=0;
+	
+	int noOfCustomers=0;
+	char customer_name[noOfBuses*seatsPerBus][30];
+	char customer_num[noOfBuses*seatsPerBus][30];
+	
+	char from[noOfBuses][100];
+	char to[noOfBuses][100];
+	char time[noOfBuses][6];
+	char price[noOfBuses][100];
+	int seats[noOfBuses];
+	
+	//Loading data from file
+	FILE *file=fopen("data.txt","r");
+	
+	fscanf(file,"%d\n",&busesInUse);
+	fscanf(file,"%s\n",pass);
+	int x;
+	for( x=1 ; x<=busesInUse ; x++)
+	{
+		fscanf(file,"%s %s %s %s %d\n",from[x], to[x], time[x], price[x], &seats[x]);
+	}
+	
+	fclose(file);
+	
+	//MAIN PART
+	do
+	{
+		printf("************************\n");
+		printf("WELCOME TO FAST EXPRESS\n");
+		printf("************************\n");
+		printf("1.Admin\n");
+		printf("2.Customer\n");
+		printf("3.Exit\n");
+		printf("Choose an option:");
+		
+		scanf("%d",&mainChoice);
+	
+		inputCheck1(&mainChoice);
+		
+		switch(mainChoice)
+		{
+		case 1://ADMIN PART
+		
+			printf("Enter 6 digit code:");
+			scanf("%s",passInput);
+			
+			printf("\n");
+	
+			passCheck(passInput,pass);//Admin password
+			
+			//Admin main	
+			do
+			{
+				printf("1.Manage Routes\n");
+				printf("2.Manage Prices\n");
+				printf("3.Manage Departure Shedules\n");
+				printf("4.View Buses\n");
+				printf("5.Change code\n");
+				printf("Choose an option:");
+				
+				int adminChoice;
+				
+				scanf("%d",&adminChoice);
+	
+				printf("\n");
+	
+				inputCheck2(&adminChoice);
+				//Admin main end
+	
+				
+				switch(adminChoice)
+				{
+				case 1://Manage Routes
+		
+					printf("1.Add Route\n");
+					printf("2.Remove Route\n");
+					printf("Choose an option:");
+		
+					int routeChoice;
+					scanf("%d",&routeChoice);
+		
+					printf("\n");
+		
+					inputCheck4(&routeChoice);
+		
+					switch(routeChoice)
+					{
+					
+					case 1://Add routes
+					
+						busesInUse++;//Increases the bus count
+			
+						seats[busesInUse]=seatsPerBus;
+			
+						printf("Enter Departure point:\n");
+						scanf("%s", from[busesInUse]);
+			
+						printf("Enter Reaching point:\n");
+						scanf("%s", to[busesInUse]);
+			
+						printf("Enter Departure time (hours):\n");
+						scanf("%s", time[busesInUse]);
+			
+						printf("Enter ticket price:\n");
+						scanf("%s", price[busesInUse]);
+						
+						
+			
+						printf("\n");
+					
+					break;//Add routes close
+				
+					case 2://Remove routes
+					
+						if(busesInUse>0)
+						{
+							int remove;
+						
+							displayBuses(busesInUse,from,to,time,price,seats);
+						
+							printf("Choose the route you want to remove:");
+							scanf("%d",&remove);
+						
+							inputCheck3(&remove,&busesInUse);
+							int x;
+							for( x=remove;x<busesInUse;x++)
+							{	
+								int y;
+								for( y=0;y<100;y++)
+								{
+									from[x][y]=from[x+1][y];
+									to[x][y]=to[x+1][y];
+									time[x][y]=time[x+1][y];
+									price[x][y]=price[x+1][y];
+								}
+							
+								seats[x]=seats[x+1];
+							}
+						
+							busesInUse--;//Decreases the bus count
+						}
+						else
+						{
+							printf("There are no buses to remove\n\n");
+						}	
+					break;//Remove routes closed
+					}
+				
+				break;
+				//Manage Routes end
+				
+				
+				//Manage Prices
+				case 2:
+					if(busesInUse>0)
+					{
+						displayBuses(busesInUse,from,to,time,price,seats);
+		
+						int change;
+						printf("Choose the bus whose price is to be changed:");
+						scanf("%d",&change);
+		
+						inputCheck3(&change,&busesInUse);
+	
+						printf("Enter new Price:");
+						scanf("%s", price[change]);
+						printf("\n");
+					}
+					else
+					{
+						printf("There are no buses in the system\n");
+					}
+					
+				break;
+				//Manage Prices end
+				
+	
+				//Mangage time
+				case 3:
+					if(busesInUse>0)
+					{
+						displayBuses(busesInUse,from,to,time,price,seats);
+		
+						int change1;
+						printf("Choose the bus whose time to be changed:");
+						scanf("%d",&change1);
+		
+						inputCheck3(&change1,&busesInUse);
+	
+						printf("Enter new departure time:");
+						scanf("%s", time[change1]);
+					}
+					else
+					{
+						printf("There are no buses in the system\n");
+					}
+					
+				break;
+				//Manage time end
+	
+	
+				//View buses
+				case 4:
+					if(busesInUse>0)
+					{
+						displayBuses(busesInUse,from,to,time,price,seats);
+					}
+					else
+					{
+						printf("There are no buses in the system\n");
+					}
+				break;
+				//View buses end
+	
+	
+				//Pass change
+				case 5:
+					printf("Enter new 6 digit code:");
+					scanf("%s", pass);
+				break;
+				
+				default:
+					printf("invalid option");
+					
+				}
+				//Pass change end
+				
+				printf("1.Return to main menu\n");
+				printf("2.Continue\n");
+				printf("Choose an option:");
+				scanf("%d",&returnChoice);
+				inputCheck4(&returnChoice);
+				printf("\n");
+				
+			}
+			while(returnChoice!=1);
+		break;//ADMIN PART END
+		
+	
+	
+		//CUSTOMER PART
+		case 2:
+			do
+			{
+				printf("1.Book ticket\n");
+				printf("2.Cancel ticket\n");
+				printf("3.View Buses\n");
+				printf("Choose an option:");
+			
+				int customerChoice;
+				scanf("%d",&customerChoice);
+		
+				inputCheck1(&customerChoice);
+		
+			
+				switch(customerChoice){
+				case 1://Ticket booking
+					noOfCustomers++;
+				
+					printf("Enter your first name:");
+					scanf("%s", customer_name[noOfCustomers]);
+		
+					printf("Enter your phone number:");
+					scanf("%s", customer_num[noOfCustomers]);
+		
+					displayBuses(busesInUse,from,to,time,price,seats);
+				
+					int busChoice;
+				
+					printf("Choose a bus:");
+					scanf("%d",&busChoice);
+		
+					inputCheck3(&busChoice,&busesInUse);
+		
+					if(seats[busChoice]<=0)
+					{
+						printf("Seats not available!\n");
+					}
+					else
+					{
+						printf("*******************TICKET*******************\n");
+						printf("Name:%s\n",customer_name[noOfCustomers]);
+						printf("Number:%s\n",customer_num[noOfCustomers]);
+						printf("From:%s\n",from[busChoice]);
+						printf("To:%s\n",to[busChoice]);
+						printf("Departure time:%shrs\n",time[busChoice]);
+						printf("Price:%spkr\n",price[busChoice]);
+						printf("Seat:%d\n",seats[busChoice]);
+						printf("Please arrive 30 min before departure time\n");
+						printf("*******************************************\n\n");
+					
+						seats[busChoice]--;//Reducing no of seats available
+					}		
+				break;//Ticket booking ends
+				
+				case 2://Ticket cancellation
+					printf("Enter your first name:");
+					scanf("%s", customer_name[noOfCustomers]);
+		
+					printf("Enter your phone number:");
+					scanf("%s", customer_num[noOfCustomers]);
+					
+					displayBuses(busesInUse,from,to,time,price,seats);
+					
+					printf("Choose a bus:");
+					scanf("%d",&busChoice);
+		
+					inputCheck3(&busChoice,&busesInUse);
+					
+					if(seats[busChoice]<seatsPerBus)
+					{
+						seats[busChoice]++;//Increasing the no of seates available
+					}
+					else if(seats[busChoice]==seatsPerBus)
+					{
+						printf("No ticket has been booked in this bus\n");
+					}
+				break;//Ticket cancellation ends
+				
+				case 3://View Buses
+					displayBuses(busesInUse,from,to,time,price,seats);
+				break;//View Buses ends	
+				}
+				
+				printf("1.Return to main menu\n");
+				printf("2.Continue\n");
+				printf("Choose an option:");
+				scanf("%d",&returnChoice2);
+				inputCheck4(&returnChoice2);
+				printf("\n");
+				
+				}while(returnChoice2!=1);	
+		break;//Custmer Part End
+		}	
+	}
+	while(mainChoice!=3);//Return to main
+	
+	//Saving data to file
+	fopen("data.txt","a");
+	
+	fprintf(file,"%d\n",busesInUse);
+	fprintf(file,"%s\n",pass);
+	int s;
+	for(s=1;s<=busesInUse;x++)
+	{
+		fprintf(file,"%s %s %s %s %d\n",from[s], to[s], time[s], price[s], seats[s]);
+	}
+	
+	fclose(file);
+	return 0;
+	
+}
+void inputCheck1(int *main_choice)
+{
+	while(*main_choice<1 || *main_choice>3)
+	{
+		printf("Invalid Input!");
+		printf("Choose an existing option:");
+		scanf("%d", main_choice);
+	}
+	printf("\n");
+}
+void inputCheck2(int *admin_choice)
+{
+	while(*admin_choice<1 || *admin_choice>5)
+	{
+		printf("Invalid Input!");
+		printf("Choose an existing option:");
+		scanf("%d", admin_choice);
+	}
+	printf("\n");
+}
+void inputCheck3(int *remove_bus,int *bus_in_use)
+{
+	while(*remove_bus<1 || *remove_bus>*bus_in_use)
+	{
+		printf("Invalid Input!");
+		printf("Choose an existing option:");
+		scanf("%d", remove_bus);
+	}
+	printf("\n");
+}
+void inputCheck4(int *route_choice)
+{
+	while(*route_choice<1 || *route_choice>2)
+	{
+		printf("Invalid Input!");
+		printf("Choose an existing option:");
+		scanf("%d", route_choice);
+	}
+	printf("\n");
+
+}
+void passCheck(char pass_input[],char pass[])
+{
+	int code;
+	do
+	{
+	code=1;
+		int x;		
+		for( x=0;x<6;x++)
+		{
+			while(pass_input[x]!=pass[x])
+			{
+				printf("Invalid Password!\n");
+				printf("Enter correct Password:");
+				scanf("%s", pass_input);
+				printf("\n");
+				code=0;
+			}	
+		}
+	}
+	while(code==0);
+	printf("\n");
+}
+void displayBuses(int busesInUse,char from[][100],char to[][100],char time[][6],char price[][100],int seat[])
+{	
+	int x;
+	for( x=1;x<=busesInUse;x++)
+	{
+		printf("#%d\nROUTE:%s to %s\nTIME:%s\nPRICE:%s\nSEATS AVAILABLE:%d\n",x,from[x],to[x],time[x],price[x],seat[x]);
+		printf("\n");
+	}
+}	
